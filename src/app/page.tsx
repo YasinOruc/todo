@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { AnimatePresence, motion } from "framer-motion"
 import { Sun, Inbox, Calendar, Trash2 } from 'lucide-react'
 
@@ -18,8 +18,12 @@ type Task = {
 
 export default function Page() {
   const [tasks, setTasks] = useState<Task[]>(() => {
-    const savedTasks = localStorage.getItem('tasks')
-    return savedTasks ? JSON.parse(savedTasks) : []
+    // Check if window is defined to prevent errors during SSR
+    if (typeof window !== 'undefined') {
+      const savedTasks = localStorage.getItem('tasks')
+      return savedTasks ? JSON.parse(savedTasks) : []
+    }
+    return []
   })
   const [newTask, setNewTask] = useState("")
   const [newLabel, setNewLabel] = useState("")
@@ -51,6 +55,13 @@ export default function Page() {
   const removeTask = (id: number) => {
     setTasks(tasks.filter(task => task.id !== id))
   }
+
+  const filteredTasks = tasks.filter(task => {
+    if (filter === 'all') return true
+    if (filter === 'active') return !task.completed
+    if (filter === 'completed') return task.completed
+    return true
+  })
 
   return (
     <div className="flex min-h-screen bg-slate-50">
@@ -93,16 +104,16 @@ export default function Page() {
             <Button onClick={addTask}>Add Task</Button>
           </div>
         </div>
-        <Tabs defaultValue="all" className="mb-6">
+        <Tabs value={filter} onValueChange={(value) => setFilter(value)} className="mb-6">
           <TabsList>
-            <TabsTrigger value="all" onClick={() => setFilter("all")}>All</TabsTrigger>
-            <TabsTrigger value="active" onClick={() => setFilter("active")}>Active</TabsTrigger>
-            <TabsTrigger value="completed" onClick={() => setFilter("completed")}>Completed</TabsTrigger>
+            <TabsTrigger value="all">All</TabsTrigger>
+            <TabsTrigger value="active">Active</TabsTrigger>
+            <TabsTrigger value="completed">Completed</TabsTrigger>
           </TabsList>
         </Tabs>
         <ScrollArea className="h-[calc(100vh-12rem)]">
           <AnimatePresence>
-            {tasks.map((task) => (
+            {filteredTasks.map((task) => (
               <motion.div
                 key={task.id}
                 initial={{ opacity: 0, y: -10 }}
