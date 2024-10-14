@@ -16,7 +16,7 @@ type Task = {
   label: string
 }
 
-export default function InteractiveTodoApp() {
+export default function Page() {
   const [tasks, setTasks] = useState<Task[]>(() => {
     const savedTasks = localStorage.getItem('tasks')
     return savedTasks ? JSON.parse(savedTasks) : []
