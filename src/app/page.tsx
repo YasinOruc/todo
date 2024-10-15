@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, memo } from 'react'
 import { Button } from "../components/ui/button"
 import { Input } from "../components/ui/input"
 import { Checkbox } from "../components/ui/checkbox"
@@ -21,7 +21,7 @@ type Label = {
   count: number
 }
 
-export default function InteractiveTodoApp() {
+const InteractiveTodoApp = () => {
   const [tasks, setTasks] = useState<Task[]>([])
   const [newTask, setNewTask] = useState<string>("")
   const [newLabel, setNewLabel] = useState<string>("")
@@ -35,20 +35,20 @@ export default function InteractiveTodoApp() {
 
   // Load tasks from localStorage on mount
   useEffect(() => {
-    const savedTasks = localStorage.getItem('tasks')
-    if (savedTasks) {
-      setTasks(JSON.parse(savedTasks))
+    try {
+      const savedTasks = JSON.parse(localStorage.getItem('tasks') || '[]')
+      setTasks(savedTasks)
+    } catch (error) {
+      console.error('Failed to load tasks from localStorage:', error)
     }
   }, [])
 
   // Save tasks to localStorage when tasks array changes
   useEffect(() => {
-    if (tasks.length > 0) {
-      localStorage.setItem('tasks', JSON.stringify(tasks))
-    }
+    localStorage.setItem('tasks', JSON.stringify(tasks))
   }, [tasks])
 
-  const addTask = () => {
+  const addTask = useCallback(() => {
     if (newTask.trim()) {
       setTasks(prevTasks => [
         ...prevTasks,
@@ -57,19 +57,19 @@ export default function InteractiveTodoApp() {
       setNewTask("")
       setNewLabel("")
     }
-  }
+  }, [newTask, newLabel])
 
-  const toggleTask = (id: number) => {
+  const toggleTask = useCallback((id: number) => {
     setTasks(prevTasks =>
       prevTasks.map(task =>
         task.id === id ? { ...task, completed: !task.completed } : task
       )
     )
-  }
+  }, [])
 
-  const removeTask = (id: number) => {
+  const removeTask = useCallback((id: number) => {
     setTasks(prevTasks => prevTasks.filter(task => task.id !== id))
-  }
+  }, [])
 
   const filteredTasks = tasks.filter(task => {
     if (filter === "all") return true
@@ -177,3 +177,5 @@ export default function InteractiveTodoApp() {
     </div>
   )
 }
+
+export default memo(InteractiveTodoApp)
