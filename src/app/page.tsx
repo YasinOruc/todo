@@ -1,11 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Checkbox } from "@/components/ui/checkbox"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Button } from "../components/ui/button"
+import { Input } from "../components/ui/input"
+import { Checkbox } from "../components/ui/checkbox"
+import { ScrollArea } from "../components/ui/scroll-area"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs"
 import { AnimatePresence, motion } from "framer-motion"
 import { Sun, Inbox, Calendar, Trash2 } from 'lucide-react'
 
@@ -16,51 +16,66 @@ type Task = {
   label: string
 }
 
-export default function Page() {
-  const [tasks, setTasks] = useState<Task[]>(() => {
-    // Check if window is defined to prevent errors during SSR
-    if (typeof window !== 'undefined') {
-      const savedTasks = localStorage.getItem('tasks')
-      return savedTasks ? JSON.parse(savedTasks) : []
-    }
-    return []
-  })
-  const [newTask, setNewTask] = useState("")
-  const [newLabel, setNewLabel] = useState("")
-  const [filter, setFilter] = useState("all")
+type Label = {
+  name: string
+  count: number
+}
 
+export default function InteractiveTodoApp() {
+  const [tasks, setTasks] = useState<Task[]>([])
+  const [newTask, setNewTask] = useState<string>("")
+  const [newLabel, setNewLabel] = useState<string>("")
+  const [filter, setFilter] = useState<string>("all")
+
+  const labels: Label[] = [
+    { name: "Work", count: tasks.filter(task => task.label === "Work").length },
+    { name: "Personal", count: tasks.filter(task => task.label === "Personal").length },
+    { name: "Urgent", count: tasks.filter(task => task.label === "Urgent").length },
+  ]
+
+  // Load tasks from localStorage on mount
   useEffect(() => {
-    localStorage.setItem('tasks', JSON.stringify(tasks))
+    const savedTasks = localStorage.getItem('tasks')
+    if (savedTasks) {
+      setTasks(JSON.parse(savedTasks))
+    }
+  }, [])
+
+  // Save tasks to localStorage when tasks array changes
+  useEffect(() => {
+    if (tasks.length > 0) {
+      localStorage.setItem('tasks', JSON.stringify(tasks))
+    }
   }, [tasks])
 
   const addTask = () => {
     if (newTask.trim()) {
-      setTasks([...tasks, {
-        id: Date.now(),
-        text: newTask,
-        completed: false,
-        label: newLabel || "Personal"
-      }])
+      setTasks(prevTasks => [
+        ...prevTasks,
+        { id: Date.now(), text: newTask, completed: false, label: newLabel || "Personal" }
+      ])
       setNewTask("")
       setNewLabel("")
     }
   }
 
   const toggleTask = (id: number) => {
-    setTasks(tasks.map(task =>
-      task.id === id ? { ...task, completed: !task.completed } : task
-    ))
+    setTasks(prevTasks =>
+      prevTasks.map(task =>
+        task.id === id ? { ...task, completed: !task.completed } : task
+      )
+    )
   }
 
   const removeTask = (id: number) => {
-    setTasks(tasks.filter(task => task.id !== id))
+    setTasks(prevTasks => prevTasks.filter(task => task.id !== id))
   }
 
   const filteredTasks = tasks.filter(task => {
-    if (filter === 'all') return true
-    if (filter === 'active') return !task.completed
-    if (filter === 'completed') return task.completed
-    return true
+    if (filter === "all") return true
+    if (filter === "completed") return task.completed
+    if (filter === "active") return !task.completed
+    return task.label === filter
   })
 
   return (
@@ -81,6 +96,20 @@ export default function Page() {
               Completed
             </Button>
           </nav>
+          <div>
+            <h3 className="font-bold text-lg mb-2">Labels</h3>
+            {labels.map((label) => (
+              <Button
+                key={label.name}
+                variant="ghost"
+                className="w-full justify-between"
+                onClick={() => setFilter(label.name)}
+              >
+                <span>{label.name}</span>
+                <span>{label.count}</span>
+              </Button>
+            ))}
+          </div>
         </ScrollArea>
       </aside>
       <main className="flex-1 p-6">
@@ -91,24 +120,24 @@ export default function Page() {
               type="text"
               placeholder="New task"
               value={newTask}
-              onChange={(e) => setNewTask(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewTask(e.target.value)}
               className="w-64"
             />
             <Input
               type="text"
               placeholder="Label"
               value={newLabel}
-              onChange={(e) => setNewLabel(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewLabel(e.target.value)}
               className="w-32"
             />
             <Button onClick={addTask}>Add Task</Button>
           </div>
         </div>
-        <Tabs value={filter} onValueChange={(value) => setFilter(value)} className="mb-6">
+        <Tabs defaultValue="all" className="mb-6">
           <TabsList>
-            <TabsTrigger value="all">All</TabsTrigger>
-            <TabsTrigger value="active">Active</TabsTrigger>
-            <TabsTrigger value="completed">Completed</TabsTrigger>
+            <TabsTrigger value="all" onClick={() => setFilter("all")}>All</TabsTrigger>
+            <TabsTrigger value="active" onClick={() => setFilter("active")}>Active</TabsTrigger>
+            <TabsTrigger value="completed" onClick={() => setFilter("completed")}>Completed</TabsTrigger>
           </TabsList>
         </Tabs>
         <ScrollArea className="h-[calc(100vh-12rem)]">
