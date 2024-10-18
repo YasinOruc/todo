@@ -239,88 +239,86 @@ export default function Todo() {
             </TabsTrigger>
           </TabsList>
         </Tabs>
-
         <DragDropContext onDragEnd={onDragEnd}>
-          <Droppable droppableId="todos">
-            {(provided) => (
-              <ul {...provided.droppableProps} ref={provided.innerRef} className="space-y-2">
-                {filteredTodos.map((todo, index) => (
-                  <Draggable key={todo.id} draggableId={todo.id.toString()} index={index}>
-                    {(provided) => (
-                      <li
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                        className={`bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm ${
-                          todo.completed ? "opacity-60" : ""
-                        } ${
-                          todo.important
-                            ? "border-l-2 border-blue-500 dark:border-blue-400"
+  <Droppable droppableId="todos">
+    {(droppableProvided) => (
+      <ul
+        {...droppableProvided.droppableProps}
+        ref={droppableProvided.innerRef}
+        className="space-y-2"
+      >
+        {filteredTodos.map((todo, index) => (
+          <Draggable key={todo.id} draggableId={todo.id.toString()} index={index}>
+            {(draggableProvided) => (
+              <li
+                ref={draggableProvided.innerRef}
+                {...draggableProvided.draggableProps}
+                {...draggableProvided.dragHandleProps}
+                className={`bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm ${
+                  todo.completed ? "opacity-60" : ""
+                } ${
+                  todo.important ? "border-l-2 border-blue-500 dark:border-blue-400" : ""
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <Checkbox
+                      checked={todo.completed}
+                      onCheckedChange={() => toggleTodo(todo.id)}
+                      className="border-2 border-gray-300 dark:border-gray-600 rounded-full w-5 h-5"
+                      aria-label={todo.completed ? "Mark as incomplete" : "Mark as complete"}
+                    />
+                    <div>
+                      <span
+                        className={`text-sm ${
+                          todo.completed
+                            ? "line-through text-gray-500 dark:text-gray-400"
                             : ""
                         }`}
                       >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-3">
-                            <Checkbox
-                              checked={todo.completed}
-                              onCheckedChange={() => toggleTodo(todo.id)}
-                              className="border-2 border-gray-300 dark:border-gray-600 rounded-full w-5 h-5"
-                              aria-label={
-                                todo.completed ? "Mark as incomplete" : "Mark as complete"
-                              }
-                            />
-                            <div>
-                              <span
-                                className={`text-sm ${
-                                  todo.completed
-                                    ? "line-through text-gray-500 dark:text-gray-400"
-                                    : ""
-                                }`}
-                              >
-                                {todo.text}
-                              </span>
-                              <p className="text-xs text-gray-400 dark:text-gray-500 mt-1 flex items-center">
-                                <Calendar className="h-3 w-3 mr-1" />
-                                {format(todo.date, "d MMM yyyy")}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex items-center space-x-1">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => toggleImportant(todo.id)}
-                              className={`rounded-full transition-all duration-300 p-1 ${
-                                todo.important
-                                  ? "text-yellow-500 dark:text-yellow-400"
-                                  : "text-gray-400 dark:text-gray-500"
-                              }`}
-                              aria-label={
-                                todo.important ? "Unmark as important" : "Mark as important"
-                              }
-                            >
-                              <Star className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => removeTodo(todo.id)}
-                              className="text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400 rounded-full transition-all duration-300 p-1"
-                              aria-label="Delete task"
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      </li>
-                    )}
-                  </Draggable>
-                ))}
-                {provided.placeholder}
-              </ul>
+                        {todo.text}
+                      </span>
+                      <p className="text-xs text-gray-400 dark:text-gray-500 mt-1 flex items-center">
+                        <Calendar className="h-3 w-3 mr-1" />
+                        {format(todo.date, "d MMM yyyy")}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => toggleImportant(todo.id)}
+                      className={`rounded-full transition-all duration-300 p-1 ${
+                        todo.important
+                          ? "text-yellow-500 dark:text-yellow-400"
+                          : "text-gray-400 dark:text-gray-500"
+                      }`}
+                      aria-label={todo.important ? "Unmark as important" : "Mark as important"}
+                    >
+                      <Star className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeTodo(todo.id)}
+                      className="text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400 rounded-full transition-all duration-300 p-1"
+                      aria-label="Delete task"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </li>
             )}
-          </Droppable>
-        </DragDropContext>
+          </Draggable>
+        ))}
+        {droppableProvided.placeholder}
+      </ul>
+    )}
+  </Droppable>
+</DragDropContext>
+
       </div>
     </div>
   )
