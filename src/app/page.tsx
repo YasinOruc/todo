@@ -9,7 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { format } from "date-fns"
-import Footer from "@/components/Footer"
+import Footer from "@/components/Footer" // Import Footer component
 
 type Todo = {
   id: number
@@ -148,8 +148,8 @@ export default function Todo() {
   }, [todos])
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white transition-all duration-300 font-sans">
-      <div className="container mx-auto p-6 max-w-2xl">
+    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white transition-all duration-300 font-sans">
+      <div className="flex-grow container mx-auto p-6 max-w-2xl">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">Todo</h1>
           <Button
@@ -313,6 +313,8 @@ export default function Todo() {
           </Droppable>
         </DragDropContext>
       </div>
+
+      <Footer />
     </div>
   )
 }
