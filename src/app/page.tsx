@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { format } from "date-fns"
+import Footer from "@/components/Footer"
 
 type Todo = {
   id: number
